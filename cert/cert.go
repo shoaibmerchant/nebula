@@ -56,6 +56,7 @@ type NebulaCertificate struct {
 type NebulaCertificateDetails struct {
 	Name      string
 	Ips       []*net.IPNet
+	NetworkId string
 	Subnets   []*net.IPNet
 	Groups    []string
 	NotBefore time.Time
@@ -120,6 +121,7 @@ func UnmarshalNebulaCertificate(b []byte) (*NebulaCertificate, error) {
 			IsCA:           rc.Details.IsCA,
 			InvertedGroups: make(map[string]struct{}),
 			Curve:          rc.Details.Curve,
+			NetworkId:      rc.Details.NetworkId,
 		},
 		Signature: make([]byte, len(rc.Signature)),
 	}
@@ -783,6 +785,7 @@ func (nc *NebulaCertificate) String() string {
 		s += "\t\tGroups: []\n"
 	}
 
+	s += fmt.Sprintf("\t\tNetwork: %v\n", nc.Details.NetworkId)
 	s += fmt.Sprintf("\t\tNot before: %v\n", nc.Details.NotBefore)
 	s += fmt.Sprintf("\t\tNot After: %v\n", nc.Details.NotAfter)
 	s += fmt.Sprintf("\t\tIs CA: %v\n", nc.Details.IsCA)
@@ -804,6 +807,7 @@ func (nc *NebulaCertificate) String() string {
 func (nc *NebulaCertificate) getRawDetails() *RawNebulaCertificateDetails {
 	rd := &RawNebulaCertificateDetails{
 		Name:      nc.Details.Name,
+		NetworkId: nc.Details.NetworkId,
 		Groups:    nc.Details.Groups,
 		NotBefore: nc.Details.NotBefore.Unix(),
 		NotAfter:  nc.Details.NotAfter.Unix(),
@@ -891,6 +895,7 @@ func (nc *NebulaCertificate) MarshalJSON() ([]byte, error) {
 		"details": m{
 			"name":      nc.Details.Name,
 			"ips":       toString(nc.Details.Ips),
+			"networkId": nc.Details.NetworkId,
 			"subnets":   toString(nc.Details.Subnets),
 			"groups":    nc.Details.Groups,
 			"notBefore": nc.Details.NotBefore,
@@ -923,6 +928,7 @@ func (nc *NebulaCertificate) Copy() *NebulaCertificate {
 			Name:           nc.Details.Name,
 			Groups:         make([]string, len(nc.Details.Groups)),
 			Ips:            make([]*net.IPNet, len(nc.Details.Ips)),
+			NetworkId:      nc.Details.NetworkId,
 			Subnets:        make([]*net.IPNet, len(nc.Details.Subnets)),
 			NotBefore:      nc.Details.NotBefore,
 			NotAfter:       nc.Details.NotAfter,

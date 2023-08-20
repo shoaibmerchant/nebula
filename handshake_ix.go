@@ -1,6 +1,7 @@
 package nebula
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/flynn/noise"
@@ -99,6 +100,11 @@ func ixHandshakeStage1(f *Interface, addr *udp.Addr, via *ViaSender, packet []by
 		return
 	}
 	vpnIp := iputil.Ip2VpnIp(remoteCert.Details.Ips[0].IP)
+	networkId, err := strconv.ParseUint(remoteCert.Details.NetworkId, 10, 32)
+	if err != nil {
+		f.l.Errorln("No network ID provided in the certificate ", err)
+	}
+
 	certName := remoteCert.Details.Name
 	fingerprint, _ := remoteCert.Sha256Sum()
 	issuer := remoteCert.Details.Issuer
@@ -134,7 +140,7 @@ func ixHandshakeStage1(f *Interface, addr *udp.Addr, via *ViaSender, packet []by
 		localIndexId:      myIndex,
 		remoteIndexId:     hs.Details.InitiatorIndex,
 		vpnIp:             vpnIp,
-		networkId:         10001, // TODO
+		networkId:         iputil.NetworkId(networkId), // TODO
 		HandshakePacket:   make(map[uint8][]byte, 0),
 		lastHandshakeTime: hs.Details.Time,
 		relayState: RelayState{

@@ -939,7 +939,7 @@ func (lhh *LightHouseHandler) handleHostQuery(n *NebulaMeta, vpnIp iputil.VpnIp,
 		return
 	}
 
-	// lhh.l.Infoln("handleHostQuery: Received Host Query from : ", vpnIp, networkId)
+	lhh.l.Infoln("handleHostQuery: Received Host Query from : ", vpnIp, networkId)
 
 	//TODO: we can DRY this further
 	reqVpnIp := n.Details.VpnIp
