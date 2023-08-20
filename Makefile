@@ -44,12 +44,16 @@ ALL_LINUX = linux-amd64 \
 	linux-mips-softfloat \
 	linux-riscv64
 
-ALL = $(ALL_LINUX) \
-	darwin-amd64 \
-	darwin-arm64 \
-	freebsd-amd64 \
-	windows-amd64 \
-	windows-arm64
+ALL = linux-arm64 \
+	  linux-amd64 \
+	  darwin-arm64
+
+# ALL = $(ALL_LINUX)
+# 	darwin-amd64
+# 	darwin-arm64
+# 	freebsd-amd64
+# 	windows-amd64
+# 	windows-arm64
 
 e2e:
 	$(TEST_ENV) go test -tags=e2e_testing -count=1 $(TEST_FLAGS) ./e2e

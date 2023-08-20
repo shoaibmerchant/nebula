@@ -163,7 +163,7 @@ func (c *HandshakeManager) handleOutbound(vpnIp iputil.VpnIp, f EncWriter, light
 		// If we only have 1 remote it is highly likely our query raced with the other host registered within the lighthouse
 		// Our vpnIp here has a tunnel with a lighthouse but has yet to send a host update packet there so we only know about
 		// the learned public ip for them. Query again to short circuit the promotion counter
-		c.lightHouse.QueryServer(vpnIp, f)
+		c.lightHouse.QueryServer(vpnIp, hostinfo.networkId, f)
 	}
 
 	// Send the handshake to all known ips, stage 2 takes care of assigning the hostinfo.remote based on the first to reply
@@ -289,10 +289,11 @@ func (c *HandshakeManager) handleOutbound(vpnIp iputil.VpnIp, f EncWriter, light
 	}
 }
 
-func (c *HandshakeManager) AddVpnIp(vpnIp iputil.VpnIp, init func(*HostInfo)) *HostInfo {
-	hostinfo, created := c.pendingHostMap.AddVpnIp(vpnIp, init)
+func (c *HandshakeManager) AddVpnIp(vpnIp iputil.VpnIp, networkId iputil.NetworkId, init func(*HostInfo)) *HostInfo {
+	hostinfo, created := c.pendingHostMap.AddVpnIp(vpnIp, networkId, init)
 
 	if created {
+		// TODO
 		c.OutboundHandshakeTimer.Add(vpnIp, c.config.tryInterval)
 		c.metricInitiated.Inc(1)
 	}

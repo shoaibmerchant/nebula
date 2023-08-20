@@ -18,6 +18,7 @@ func Test_NewHandshakeManagerVpnIp(t *testing.T) {
 	_, vpncidr, _ := net.ParseCIDR("172.1.1.1/24")
 	_, localrange, _ := net.ParseCIDR("10.1.1.1/24")
 	ip := iputil.Ip2VpnIp(net.ParseIP("172.1.1.2"))
+	networkId := iputil.NetworkId(10001)
 	preferredRanges := []*net.IPNet{localrange}
 	mw := &mockEncWriter{}
 	mainHM := NewHostMap(l, "test", vpncidr, preferredRanges)
@@ -33,11 +34,11 @@ func Test_NewHandshakeManagerVpnIp(t *testing.T) {
 		initCalled = true
 	}
 
-	i := blah.AddVpnIp(ip, initFunc)
+	i := blah.AddVpnIp(ip, networkId, initFunc)
 	assert.True(t, initCalled)
 
 	initCalled = false
-	i2 := blah.AddVpnIp(ip, initFunc)
+	i2 := blah.AddVpnIp(ip, networkId, initFunc)
 	assert.False(t, initCalled)
 	assert.Same(t, i, i2)
 

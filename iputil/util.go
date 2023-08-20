@@ -8,6 +8,7 @@ import (
 )
 
 type VpnIp uint32
+type NetworkId uint32
 
 const maxIPv4StringLen = len("255.255.255.255")
 

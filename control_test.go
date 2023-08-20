@@ -59,6 +59,7 @@ func TestControl_GetHostInfoByVpnIp(t *testing.T) {
 		remoteIndexId: 200,
 		localIndexId:  201,
 		vpnIp:         iputil.Ip2VpnIp(ipNet.IP),
+		networkId:     10001,
 		relayState: RelayState{
 			relays:        map[iputil.VpnIp]struct{}{},
 			relayForByIp:  map[iputil.VpnIp]*Relay{},
@@ -75,6 +76,7 @@ func TestControl_GetHostInfoByVpnIp(t *testing.T) {
 		remoteIndexId: 200,
 		localIndexId:  201,
 		vpnIp:         iputil.Ip2VpnIp(ipNet2.IP),
+		networkId:     10001,
 		relayState: RelayState{
 			relays:        map[iputil.VpnIp]struct{}{},
 			relayForByIp:  map[iputil.VpnIp]*Relay{},

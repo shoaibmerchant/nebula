@@ -74,6 +74,7 @@ func Test_NewConnectionManagerTest(t *testing.T) {
 	// Add an ip we have established a connection w/ to hostmap
 	hostinfo := &HostInfo{
 		vpnIp:         vpnIp,
+		networkId:     10001,
 		localIndexId:  1099,
 		remoteIndexId: 9901,
 	}
@@ -153,6 +154,7 @@ func Test_NewConnectionManagerTest2(t *testing.T) {
 	// Add an ip we have established a connection w/ to hostmap
 	hostinfo := &HostInfo{
 		vpnIp:         vpnIp,
+		networkId:     10001,
 		localIndexId:  1099,
 		remoteIndexId: 9901,
 	}

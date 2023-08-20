@@ -163,7 +163,7 @@ func (f *Interface) readOutsidePackets(addr *udp.Addr, via *ViaSender, out []byt
 			return
 		}
 
-		lhf(addr, hostinfo.vpnIp, d)
+		lhf(addr, hostinfo.vpnIp, hostinfo.networkId, d)
 
 		// Fallthrough to the bottom to record incoming traffic
 

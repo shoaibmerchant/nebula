@@ -444,9 +444,9 @@ func (lh *LightHouse) loadStaticMap(c *config.C, tunCidr *net.IPNet, staticList 
 	return nil
 }
 
-func (lh *LightHouse) Query(ip iputil.VpnIp, f EncWriter) *RemoteList {
+func (lh *LightHouse) Query(ip iputil.VpnIp, networkId iputil.NetworkId, f EncWriter) *RemoteList {
 	if !lh.IsLighthouseIP(ip) {
-		lh.QueryServer(ip, f)
+		lh.QueryServer(ip, networkId, f)
 	}
 	lh.RLock()
 	if v, ok := lh.addrMap[ip]; ok {
@@ -458,7 +458,7 @@ func (lh *LightHouse) Query(ip iputil.VpnIp, f EncWriter) *RemoteList {
 }
 
 // This is asynchronous so no reply should be expected
-func (lh *LightHouse) QueryServer(ip iputil.VpnIp, f EncWriter) {
+func (lh *LightHouse) QueryServer(ip iputil.VpnIp, networkId iputil.NetworkId, f EncWriter) {
 	if lh.amLighthouse {
 		return
 	}
@@ -500,9 +500,10 @@ func (lh *LightHouse) QueryCache(ip iputil.VpnIp) *RemoteList {
 // queryAndPrepMessage is a lock helper on RemoteList, assisting the caller to build a lighthouse message containing
 // details from the remote list. It looks for a hit in the addrMap and a hit in the RemoteList under the owner vpnIp
 // If one is found then f() is called with proper locking, f() must return result of n.MarshalTo()
-func (lh *LightHouse) queryAndPrepMessage(vpnIp iputil.VpnIp, f func(*cache) (int, error)) (bool, int, error) {
+func (lh *LightHouse) queryAndPrepMessage(vpnIp iputil.VpnIp, networkId iputil.NetworkId, f func(*cache) (int, error)) (bool, int, error) {
 	lh.RLock()
 	// Do we have an entry in the main cache?
+
 	if v, ok := lh.addrMap[vpnIp]; ok {
 		// Swap lh lock for remote list lock
 		v.RLock()
@@ -886,12 +887,12 @@ func (lhh *LightHouseHandler) resetMeta() *NebulaMeta {
 }
 
 func lhHandleRequest(lhh *LightHouseHandler, f *Interface) udp.LightHouseHandlerFunc {
-	return func(rAddr *udp.Addr, vpnIp iputil.VpnIp, p []byte) {
-		lhh.HandleRequest(rAddr, vpnIp, p, f)
+	return func(rAddr *udp.Addr, vpnIp iputil.VpnIp, networkId iputil.NetworkId, p []byte) {
+		lhh.HandleRequest(rAddr, vpnIp, networkId, p, f)
 	}
 }
 
-func (lhh *LightHouseHandler) HandleRequest(rAddr *udp.Addr, vpnIp iputil.VpnIp, p []byte, w EncWriter) {
+func (lhh *LightHouseHandler) HandleRequest(rAddr *udp.Addr, vpnIp iputil.VpnIp, networkId iputil.NetworkId, p []byte, w EncWriter) {
 	n := lhh.resetMeta()
 	err := n.Unmarshal(p)
 	if err != nil {
@@ -912,7 +913,7 @@ func (lhh *LightHouseHandler) HandleRequest(rAddr *udp.Addr, vpnIp iputil.VpnIp,
 
 	switch n.Type {
 	case NebulaMeta_HostQuery:
-		lhh.handleHostQuery(n, vpnIp, rAddr, w)
+		lhh.handleHostQuery(n, vpnIp, networkId, rAddr, w)
 
 	case NebulaMeta_HostQueryReply:
 		lhh.handleHostQueryReply(n, vpnIp)
@@ -929,7 +930,7 @@ func (lhh *LightHouseHandler) HandleRequest(rAddr *udp.Addr, vpnIp iputil.VpnIp,
 	}
 }
 
-func (lhh *LightHouseHandler) handleHostQuery(n *NebulaMeta, vpnIp iputil.VpnIp, addr *udp.Addr, w EncWriter) {
+func (lhh *LightHouseHandler) handleHostQuery(n *NebulaMeta, vpnIp iputil.VpnIp, networkId iputil.NetworkId, addr *udp.Addr, w EncWriter) {
 	// Exit if we don't answer queries
 	if !lhh.lh.amLighthouse {
 		if lhh.l.Level >= logrus.DebugLevel {
@@ -938,10 +939,12 @@ func (lhh *LightHouseHandler) handleHostQuery(n *NebulaMeta, vpnIp iputil.VpnIp,
 		return
 	}
 
+	// lhh.l.Infoln("handleHostQuery: Received Host Query from : ", vpnIp, networkId)
+
 	//TODO: we can DRY this further
 	reqVpnIp := n.Details.VpnIp
 	//TODO: Maybe instead of marshalling into n we marshal into a new `r` to not nuke our current request data
-	found, ln, err := lhh.lh.queryAndPrepMessage(iputil.VpnIp(n.Details.VpnIp), func(c *cache) (int, error) {
+	found, ln, err := lhh.lh.queryAndPrepMessage(iputil.VpnIp(n.Details.VpnIp), networkId, func(c *cache) (int, error) {
 		n = lhh.resetMeta()
 		n.Type = NebulaMeta_HostQueryReply
 		n.Details.VpnIp = reqVpnIp
@@ -964,7 +967,7 @@ func (lhh *LightHouseHandler) handleHostQuery(n *NebulaMeta, vpnIp iputil.VpnIp,
 	w.SendMessageToVpnIp(header.LightHouse, 0, vpnIp, lhh.pb[:ln], lhh.nb, lhh.out[:0])
 
 	// This signals the other side to punch some zero byte udp packets
-	found, ln, err = lhh.lh.queryAndPrepMessage(vpnIp, func(c *cache) (int, error) {
+	found, ln, err = lhh.lh.queryAndPrepMessage(vpnIp, networkId, func(c *cache) (int, error) {
 		n = lhh.resetMeta()
 		n.Type = NebulaMeta_HostPunchNotification
 		n.Details.VpnIp = uint32(vpnIp)

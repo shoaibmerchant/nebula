@@ -18,7 +18,7 @@ func ixHandshakeStage0(f *Interface, vpnIp iputil.VpnIp, hostinfo *HostInfo) {
 	// We do it here to provoke the lighthouse to preempt our timer wheel and trigger the stage 1 packet to send
 	// more quickly, effect is a quicker handshake.
 	if hostinfo.remote == nil {
-		f.lightHouse.QueryServer(vpnIp, f)
+		f.lightHouse.QueryServer(vpnIp, hostinfo.networkId, f)
 	}
 
 	err := f.handshakeManager.AddIndexHostInfo(hostinfo)
@@ -134,6 +134,7 @@ func ixHandshakeStage1(f *Interface, addr *udp.Addr, via *ViaSender, packet []by
 		localIndexId:      myIndex,
 		remoteIndexId:     hs.Details.InitiatorIndex,
 		vpnIp:             vpnIp,
+		networkId:         10001, // TODO
 		HandshakePacket:   make(map[uint8][]byte, 0),
 		lastHandshakeTime: hs.Details.Time,
 		relayState: RelayState{

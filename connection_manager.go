@@ -474,7 +474,7 @@ func (n *connectionManager) tryRehandshake(hostinfo *HostInfo) {
 		Info("Re-handshaking with remote")
 
 	//TODO: this is copied from getOrHandshake to keep the extra checks out of the hot path, figure it out
-	newHostinfo := n.intf.handshakeManager.AddVpnIp(hostinfo.vpnIp, n.intf.initHostInfo)
+	newHostinfo := n.intf.handshakeManager.AddVpnIp(hostinfo.vpnIp, hostinfo.networkId, n.intf.initHostInfo)
 	if !newHostinfo.HandshakeReady {
 		ixHandshakeStage0(n.intf, newHostinfo.vpnIp, newHostinfo)
 	}

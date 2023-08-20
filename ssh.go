@@ -518,7 +518,7 @@ func sshQueryLighthouse(ifce *Interface, fs interface{}, a []string, w sshd.Stri
 	}
 
 	var cm *CacheMap
-	rl := ifce.lightHouse.Query(vpnIp, ifce)
+	rl := ifce.lightHouse.Query(vpnIp, 10001, ifce)
 	if rl != nil {
 		cm = rl.CopyCache()
 	}
@@ -606,7 +606,8 @@ func sshCreateTunnel(ifce *Interface, fs interface{}, a []string, w sshd.StringW
 		}
 	}
 
-	hostInfo = ifce.handshakeManager.AddVpnIp(vpnIp, ifce.initHostInfo)
+	// TODO
+	hostInfo = ifce.handshakeManager.AddVpnIp(vpnIp, 10001, ifce.initHostInfo)
 	if addr != nil {
 		hostInfo.SetRemote(addr)
 	}

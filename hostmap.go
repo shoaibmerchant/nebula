@@ -213,6 +213,7 @@ type HostInfo struct {
 	remoteIndexId        uint32
 	localIndexId         uint32
 	vpnIp                iputil.VpnIp
+	networkId            iputil.NetworkId
 	recvError            int
 	remoteCidr           *cidr.Tree4
 	relayState           RelayState
@@ -316,12 +317,13 @@ func (hm *HostMap) Add(ip iputil.VpnIp, hostinfo *HostInfo) {
 	hm.Unlock()
 }
 
-func (hm *HostMap) AddVpnIp(vpnIp iputil.VpnIp, init func(hostinfo *HostInfo)) (hostinfo *HostInfo, created bool) {
+func (hm *HostMap) AddVpnIp(vpnIp iputil.VpnIp, networkId iputil.NetworkId, init func(hostinfo *HostInfo)) (hostinfo *HostInfo, created bool) {
 	hm.RLock()
 	if h, ok := hm.Hosts[vpnIp]; !ok {
 		hm.RUnlock()
 		h = &HostInfo{
 			vpnIp:           vpnIp,
+			networkId:       networkId,
 			HandshakePacket: make(map[uint8][]byte, 0),
 			relayState: RelayState{
 				relays:        map[iputil.VpnIp]struct{}{},
@@ -647,7 +649,7 @@ func (i *HostInfo) TryPromoteBest(preferredRanges []*net.IPNet, ifce *Interface)
 
 	// Re query our lighthouses for new remotes occasionally
 	if c%ReQueryEvery == 0 && ifce.lightHouse != nil {
-		ifce.lightHouse.QueryServer(i.vpnIp, ifce)
+		ifce.lightHouse.QueryServer(i.vpnIp, i.networkId, ifce)
 	}
 }
 
