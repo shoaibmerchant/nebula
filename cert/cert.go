@@ -27,17 +27,17 @@ import (
 const publicKeyLen = 32
 
 const (
-	CertBanner                       = "NEBULA CERTIFICATE"
-	X25519PrivateKeyBanner           = "NEBULA X25519 PRIVATE KEY"
-	X25519PublicKeyBanner            = "NEBULA X25519 PUBLIC KEY"
-	EncryptedEd25519PrivateKeyBanner = "NEBULA ED25519 ENCRYPTED PRIVATE KEY"
-	Ed25519PrivateKeyBanner          = "NEBULA ED25519 PRIVATE KEY"
-	Ed25519PublicKeyBanner           = "NEBULA ED25519 PUBLIC KEY"
+	CertBanner                       = "MECHA CERTIFICATE"
+	X25519PrivateKeyBanner           = "MECHA X25519 PRIVATE KEY"
+	X25519PublicKeyBanner            = "MECHA X25519 PUBLIC KEY"
+	EncryptedEd25519PrivateKeyBanner = "MECHA ED25519 ENCRYPTED PRIVATE KEY"
+	Ed25519PrivateKeyBanner          = "MECHA ED25519 PRIVATE KEY"
+	Ed25519PublicKeyBanner           = "MECHA ED25519 PUBLIC KEY"
 
-	P256PrivateKeyBanner               = "NEBULA P256 PRIVATE KEY"
-	P256PublicKeyBanner                = "NEBULA P256 PUBLIC KEY"
-	EncryptedECDSAP256PrivateKeyBanner = "NEBULA ECDSA P256 ENCRYPTED PRIVATE KEY"
-	ECDSAP256PrivateKeyBanner          = "NEBULA ECDSA P256 PRIVATE KEY"
+	P256PrivateKeyBanner               = "MECHA P256 PRIVATE KEY"
+	P256PublicKeyBanner                = "MECHA P256 PUBLIC KEY"
+	EncryptedECDSAP256PrivateKeyBanner = "MECHA ECDSA P256 ENCRYPTED PRIVATE KEY"
+	ECDSAP256PrivateKeyBanner          = "MECHA ECDSA P256 PRIVATE KEY"
 )
 
 type NebulaCertificate struct {
