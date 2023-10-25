@@ -45,7 +45,7 @@ func newSignFlags() *signFlags {
 	sf.outKeyPath = sf.set.String("out-key", "", "Optional (if in-pub not set): path to write the private key to")
 	sf.outCertPath = sf.set.String("out-crt", "", "Optional: path to write the certificate to")
 	sf.outQRPath = sf.set.String("out-qr", "", "Optional: output a qr code image (png) of the certificate")
-	sf.domains = sf.set.String("domains", "", "Optional: Assign network domains to the cert, restricting the nodes it can connect to, wildcards like *, *.nebula.net are allowed too")
+	sf.domains = sf.set.String("domains", "", "Optional: Assign network domains to the cert, restricting the nodes it can connect to, wildcards not allowed; prefer fully qualified domains")
 	sf.groups = sf.set.String("groups", "", "Optional: comma separated list of groups")
 	sf.subnets = sf.set.String("subnets", "", "Optional: comma separated list of ipv4 address and network in CIDR notation. Subnets this cert can serve for")
 	return &sf
