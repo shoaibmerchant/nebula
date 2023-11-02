@@ -47,7 +47,7 @@ func newCaFlags() *caFlags {
 	cf.outCertPath = cf.set.String("out-crt", "ca.crt", "Optional: path to write the certificate to")
 	cf.outQRPath = cf.set.String("out-qr", "", "Optional: output a qr code image (png) of the certificate")
 	cf.groups = cf.set.String("groups", "", "Optional: comma separated list of groups. This will limit which groups subordinate certs can use")
-	cf.domains = cf.set.String("domains", "*", "Optional: comma separated list of domains. This will limit which domains subordinate certs can use. Wildcards (*, *.domain.com) are supported")
+	cf.domains = cf.set.String("domains", "*", "Optional: comma separated list of domains. This will limit which domains subordinate certs can use. Wildcards (*, *.domain.com) are supported to scope what domains can be added")
 	cf.ips = cf.set.String("ips", "", "Optional: comma separated list of ipv4 address and network in CIDR notation. This will limit which ipv4 addresses and networks subordinate certs can use for ip addresses")
 	cf.subnets = cf.set.String("subnets", "", "Optional: comma separated list of ipv4 address and network in CIDR notation. This will limit which ipv4 addresses and networks subordinate certs can use in subnets")
 	cf.argonMemory = cf.set.Uint("argon-memory", 2*1024*1024, "Optional: Argon2 memory parameter (in KiB) used for encrypted private key passphrase")
