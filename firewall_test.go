@@ -399,7 +399,7 @@ func TestFirewall_Drop2(t *testing.T) {
 
 	c1 := cert.NebulaCertificate{
 		Details: cert.NebulaCertificateDetails{
-			Name:            "host1",
+			Name:            "host2",
 			Ips:             []*net.IPNet{&ipNet},
 			Domains:         []string{"nebula.net"},
 			InvertedGroups:  map[string]struct{}{"default-group": {}, "test-group-not": {}},
@@ -524,6 +524,75 @@ func TestFirewall_Drop3(t *testing.T) {
 	// c3 should fail because no match
 	resetConntrack(fw)
 	assert.Equal(t, fw.Drop([]byte{}, p, true, &h3, cp, nil), ErrNoMatchingRule)
+}
+
+func TestFirewall_Drop4(t *testing.T) {
+	l := test.NewLogger()
+	ob := &bytes.Buffer{}
+	l.SetOutput(ob)
+
+	p := firewall.Packet{
+		LocalIP:    iputil.Ip2VpnIp(net.IPv4(1, 2, 3, 4)),
+		RemoteIP:   iputil.Ip2VpnIp(net.IPv4(1, 2, 3, 4)),
+		LocalPort:  10,
+		RemotePort: 90,
+		Protocol:   firewall.ProtoUDP,
+		Fragment:   false,
+	}
+
+	ipNet := net.IPNet{
+		IP:   net.IPv4(1, 2, 3, 4),
+		Mask: net.IPMask{255, 255, 255, 0},
+	}
+
+	c := cert.NebulaCertificate{
+		Details: cert.NebulaCertificateDetails{
+			Name:            "host1",
+			Ips:             []*net.IPNet{&ipNet},
+			Domains:         []string{"nebula1.net"},
+			InvertedGroups:  map[string]struct{}{"default-group": {}, "test-group": {}},
+			InvertedDomains: map[string]struct{}{"nebula.net": {}},
+		},
+	}
+	h := HostInfo{
+		ConnectionState: &ConnectionState{
+			peerCert: &c,
+			certState: &CertState{
+				certificate: &c,
+			},
+		},
+		vpnIp: iputil.Ip2VpnIp(ipNet.IP),
+	}
+	h.CreateRemoteCIDR(&c)
+
+	c1 := cert.NebulaCertificate{
+		Details: cert.NebulaCertificateDetails{
+			Name:            "host1",
+			Ips:             []*net.IPNet{&ipNet},
+			Domains:         []string{"nebula2.net"},
+			InvertedGroups:  map[string]struct{}{"default-group": {}, "test-group": {}},
+			InvertedDomains: map[string]struct{}{"nebula2.net": {}},
+		},
+	}
+	h1 := HostInfo{
+		ConnectionState: &ConnectionState{
+			peerCert: &c1,
+			certState: &CertState{
+				certificate: &c,
+			},
+		},
+	}
+	h1.CreateRemoteCIDR(&c1)
+
+	fw := NewFirewall(l, time.Second, time.Minute, time.Hour, &c)
+	assert.Nil(t, fw.AddRule(true, firewall.ProtoAny, 0, 0, []string{"default-group", "test-group"}, "", nil, nil, "", ""))
+	cp := cert.NewCAPool()
+
+	// h1/c1 lacks the matching domains
+	assert.Error(t, fw.Drop([]byte{}, p, true, &h1, cp, nil), ErrNoMatchingDomain)
+	// c has the matching domains
+	resetConntrack(fw)
+	assert.NoError(t, fw.Drop([]byte{}, p, true, &h, cp, nil))
 }
 
 func TestFirewall_DropConntrackReload(t *testing.T) {
